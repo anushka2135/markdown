@@ -1,0 +1,42 @@
+name: Matrix Build Demo
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        node-version: [14, 16, 18]   # 3+ variants
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # REQUIRED IDENTIFIER STEP
+      - name: matrix-fcc3449
+        run: echo "Running build for Node version: ${{ matrix['node-version'] }}"
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Generate build artifact
+        run: |
+          ARTFILE="build-output-${{ matrix.node-version }}.txt"
+          echo "Build output for Node version ${{ matrix.node-version }}" > "$ARTFILE"
+          # Add more info so file is non-empty
+          date >> "$ARTFILE"
+          echo "matrix: ${{ toJson(matrix) }}" >> "$ARTFILE"
+          ls -l "$ARTFILE"
+          cat "$ARTFILE"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-fcc3449-v${{ matrix.node-version }}
+          path: build-output-${{ matrix.node-version }}.txt
